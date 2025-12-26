@@ -1,20 +1,20 @@
-name: Render Masakado Video
+name: Render Video (Manual)
 
 on:
-  push:
-    paths:
-      - "assets/**"
-      - "list.txt"
+  workflow_dispatch:
 
 jobs:
   render:
     runs-on: ubuntu-latest
 
     steps:
-      - uses: actions/checkout@v4
+      - name: Checkout repository
+        uses: actions/checkout@v4
 
       - name: Install ffmpeg
-        run: sudo apt-get update && sudo apt-get install -y ffmpeg
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y ffmpeg
 
       - name: Combine audio
         run: |
@@ -25,11 +25,13 @@ jobs:
       - name: Render video
         run: |
           ffmpeg -stream_loop -1 -i assets/image.mp4 -i output.wav \
-          -c:v libx264 -c:a copy -shortest -pix_fmt yuv420p \
+          -c:v libx264 \
+          -c:a copy -shortest \
+          -pix_fmt yuv420p \
           output/masakado.mp4
 
       - name: Upload artifact
         uses: actions/upload-artifact@v4
         with:
-          name: masakado-video
+          name: rendered-video
           path: output/masakado.mp4
